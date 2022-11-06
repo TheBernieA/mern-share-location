@@ -1,0 +1,24 @@
+AUTH.js
+-Routing per il SignUp e SignIn
+-Loading state and error checks added
+-Error checks added
+
+SHARED COMPONENETS
+-Error Modal and LoadingSpinner added
+
+user/pages/USERS.JS
+added fectch to get list of users from BE
+
+HOOKS
+custom http-hook added to avoid repeating code (Used in some COMPONENETS)
+
+NewPlace.js
+Post request implemented
+
+Auth-context
+added userId: null to manage creator id app-wide
+
+UPLACEPLACES
+updating place via patch request
+
+PLACE ITEM

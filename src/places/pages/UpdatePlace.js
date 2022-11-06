@@ -1,8 +1,13 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
+import { useHistory } from "react-router-dom/cjs/react-router-dom";
 import Button from "../../shared/components/FormElements/Button";
 import Input from "../../shared/components/FormElements/Input";
 import Card from "../../shared/components/UIElements/Card";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
+import { AuthContext } from "../../shared/context/auth-context";
+import { useHttpClient } from "../../shared/hooks/http-hook";
 import useForm from "../../shared/hooks/useForm";
 import {
   VALIDATOR_MINLENGTH,
@@ -11,37 +16,41 @@ import {
 
 import "./PlaceForm.css";
 
-const DUMMY_PLACES = [
-  {
-    id: "p1",
-    title: "Empire state building",
-    description: "Famous sky scapper",
-    imageUrl:
-      "https://upload.wikimedia.org/wikipedia/it/thumb/6/62/Mario_Rossi_%28direttore_d%27orchestra%29.jpg/1024px-Mario_Rossi_%28direttore_d%27orchestra%29.jpg",
-    address: "20 W 34th St., New York, NY 10001, United States",
-    location: {
-      lat: 40.7484405,
-      lng: -73.9856644,
-    },
-    creator: "u1",
-  },
-  {
-    id: "p2",
-    title: "Empire state building",
-    description: "Famous sky scapper",
-    imageUrl:
-      "https://upload.wikimedia.org/wikipedia/it/thumb/6/62/Mario_Rossi_%28direttore_d%27orchestra%29.jpg/1024px-Mario_Rossi_%28direttore_d%27orchestra%29.jpg",
-    address: "20 W 34th St., New York, NY 10001, United States",
-    location: {
-      lat: 40.7484405,
-      lng: -73.9856644,
-    },
-    creator: "u2",
-  },
-];
+// const DUMMY_PLACES = [
+//   {
+//     id: "p1",
+//     title: "Empire state building",
+//     description: "Famous sky scapper",
+//     imageUrl:
+//       "https://upload.wikimedia.org/wikipedia/it/thumb/6/62/Mario_Rossi_%28direttore_d%27orchestra%29.jpg/1024px-Mario_Rossi_%28direttore_d%27orchestra%29.jpg",
+//     address: "20 W 34th St., New York, NY 10001, United States",
+//     location: {
+//       lat: 40.7484405,
+//       lng: -73.9856644,
+//     },
+//     creator: "u1",
+//   },
+//   {
+//     id: "p2",
+//     title: "Empire state building",
+//     description: "Famous sky scapper",
+//     imageUrl:
+//       "https://upload.wikimedia.org/wikipedia/it/thumb/6/62/Mario_Rossi_%28direttore_d%27orchestra%29.jpg/1024px-Mario_Rossi_%28direttore_d%27orchestra%29.jpg",
+//     address: "20 W 34th St., New York, NY 10001, United States",
+//     location: {
+//       lat: 40.7484405,
+//       lng: -73.9856644,
+//     },
+//     creator: "u2",
+//   },
+// ];
+
 const UpdatePlace = () => {
-  const [isLoading, setIsLoading] = useState(true);
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
+  const [loadedPlaces, setLoadedPlaces] = useState();
   const params = useParams().placeId;
+  const auth = useContext(AuthContext)
+  const history = useHistory()
   const [formState, inputHandler, setFormData] = useForm(
     {
       title: {
@@ -56,77 +65,102 @@ const UpdatePlace = () => {
     false
   );
 
-  const identifiedPlace = DUMMY_PLACES.find((place) => place.id === params);
+  // const identifiedPlace = DUMMY_PLACES.find((place) => place.id === params);
 
   useEffect(() => {
-    if(identifiedPlace){
-        setFormData(
-          {
-            title: {
-              value: identifiedPlace.title,
-              isValid: true,
-            },
-            description: {
-              value: identifiedPlace.description,
-              isValid: true,
-            },
+    const getPlace = async () => {
+      const response = await sendRequest(
+        `http://localhost:3000/api/places/${params}`
+      );
+      setLoadedPlaces(response.place);
+      setFormData(
+        {
+          title: {
+            value: response.place.title,
+            isValid: true,
           },
-          true
-        );
-        setIsLoading(false)
-    }
-  }, [setFormData, identifiedPlace]);
+          description: {
+            value: response.place.description,
+            isValid: true,
+          },
+        },
+        true
+      );
+    };
+    getPlace();
+  }, [sendRequest, params, setFormData]);
 
-  if (!identifiedPlace) {
+  if (isLoading) {
     return (
-        <Card className="center">
-            <h2>Could not find place!</h2>
-        </Card>
+      <div className="center">
+        <LoadingSpinner asOverlay />
+      </div>
     );
   }
 
-  if(isLoading){
+  if (!isLoading && !error) {
     return (
-        <div className="center">
-          <h2>Loading...</h2>
-        </div>
-      );
+      <Card className="center">
+        <h2>Could not find place!</h2>
+      </Card>
+    );
   }
 
-  const updateSubmitHandler = (event) => {
+  const updateSubmitHandler = async (event) => {
     event.preventDefault();
+    try {
+      await sendRequest(
+        `http://localhost:3000/api/places/${params}`,
+        "PATCH",
+        JSON.stringify({
+          title: formState.inputs.title.value,
+          description: formState.inputs.description.value,
+        }),
+        {
+          "Content-Type": "application/json",
+        }
+      );
+      history.push('/' + auth.userId + '/places')
+    } catch (error) {
+      
+    }
     console.log(formState.inputs);
   };
 
   return (
-      <form action="" className="place-form" onSubmit={updateSubmitHandler}>
-        <Input
-          id="title"
-          element="input"
-          type="text"
-          label="Title"
-          validators={[VALIDATOR_REQUIRE()]}
-          errorText="Please enter a valid title"
-          onInput={inputHandler}
-          value={formState.inputs.title.value}
-          valid={formState.inputs.title.isValid}
-        />
-        <Input
-          id="description"
-          element="textarea"
-          label="Description"
-          validators={[VALIDATOR_MINLENGTH(5)]}
-          errorText="Please set a valid descritption (min. 5 characters)."
-          onInput={inputHandler}
-          value={formState.inputs.description.value}
-          valid={formState.inputs.description.isValid}
-        />
+    <Fragment>
+      <ErrorModal error={error} onClear={clearError} />
+      {!isLoading && loadedPlaces && (
+        <form action="" className="place-form" onSubmit={updateSubmitHandler}>
+          <Input
+            id="title"
+            element="input"
+            type="text"
+            label="Title"
+            validators={[VALIDATOR_REQUIRE()]}
+            errorText="Please enter a valid title"
+            onInput={inputHandler}
+            value={formState.title}
+            valid={true}
+          />
+          <Input
+            id="description"
+            element="textarea"
+            label="Description"
+            validators={[VALIDATOR_MINLENGTH(5)]}
+            errorText="Please set a valid descritption (min. 5 characters)."
+            onInput={inputHandler}
+            value={loadedPlaces.description}
+            valid={true}
+          />
 
-        <Button type="submit" disabled={!formState.isValid}>
-          Update Place
-        </Button>
-      </form>
-    )
+          <Button type="submit" disabled={!formState.isValid}>
+            Update Place
+          </Button>
+        </form>
+      )}
+    </Fragment>
+  );
 };
 
 export default UpdatePlace;
