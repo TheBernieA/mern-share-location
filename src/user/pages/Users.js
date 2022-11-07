@@ -22,7 +22,7 @@ const Users = () => {
       try {
         const response = await fetch("http://localhost:3000/api/users");
         const data = await response.json();
-        console.log(data);
+        // console.log(data);
         if (!response.ok) {
           throw new Error(data.message || "Something went wrong, counld fetch users");
         }

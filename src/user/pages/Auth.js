@@ -52,12 +52,13 @@ const Auth = () => {
           }
         });
         const data = await response.json();
+        console.log(data);
         if (!response.ok) {
           throw new Error(data.message);
         }
-        console.log(data);
+        // console.log(data);
         setIsLoading(false);
-        auth.login();
+        auth.login(data.user.id);
       } catch (error) {
         setIsLoading(false);
         console.log(error);
@@ -80,7 +81,7 @@ const Auth = () => {
         if (!response.ok) {
           throw new Error(data.message);
         }
-        console.log(data);
+        // console.log(data);
         setIsLoading(false);
         auth.login(data.user.id);
       } catch (error) {

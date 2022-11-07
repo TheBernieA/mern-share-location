@@ -49,8 +49,9 @@ const UpdatePlace = () => {
   const { isLoading, error, sendRequest, clearError } = useHttpClient();
   const [loadedPlaces, setLoadedPlaces] = useState();
   const params = useParams().placeId;
-  const auth = useContext(AuthContext)
-  const history = useHistory()
+  const auth = useContext(AuthContext);
+  const history = useHistory();
+
   const [formState, inputHandler, setFormData] = useForm(
     {
       title: {
@@ -69,42 +70,28 @@ const UpdatePlace = () => {
 
   useEffect(() => {
     const getPlace = async () => {
-      const response = await sendRequest(
-        `http://localhost:3000/api/places/${params}`
-      );
-      setLoadedPlaces(response.place);
-      setFormData(
-        {
-          title: {
-            value: response.place.title,
-            isValid: true,
+      try {
+        const response = await sendRequest(
+          `http://localhost:3000/api/places/${params}`
+        );
+        setLoadedPlaces(response.place);
+        setFormData(
+          {
+            title: {
+              value: response.place.title,
+              isValid: true,
+            },
+            description: {
+              value: response.place.description,
+              isValid: true,
+            },
           },
-          description: {
-            value: response.place.description,
-            isValid: true,
-          },
-        },
-        true
-      );
+          true
+        );
+      } catch (error) {}
     };
     getPlace();
   }, [sendRequest, params, setFormData]);
-
-  if (isLoading) {
-    return (
-      <div className="center">
-        <LoadingSpinner asOverlay />
-      </div>
-    );
-  }
-
-  if (!isLoading && !error) {
-    return (
-      <Card className="center">
-        <h2>Could not find place!</h2>
-      </Card>
-    );
-  }
 
   const updateSubmitHandler = async (event) => {
     event.preventDefault();
@@ -120,13 +107,26 @@ const UpdatePlace = () => {
           "Content-Type": "application/json",
         }
       );
-      history.push('/' + auth.userId + '/places')
-    } catch (error) {
-      
-    }
-    console.log(formState.inputs);
+      history.push("/" + auth.userId + "/places");
+    } catch (error) {}
+    // console.log(formState.inputs);
+    console.log(error.message);
   };
+  if (isLoading) {
+    return (
+      <div className="center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
+  if (!isLoading && !error) {
+    return (
+      <Card className="center">
+        <h2>Could not find place!</h2>
+      </Card>
+    );
+  }
   return (
     <Fragment>
       <ErrorModal error={error} onClear={clearError} />
@@ -140,7 +140,7 @@ const UpdatePlace = () => {
             validators={[VALIDATOR_REQUIRE()]}
             errorText="Please enter a valid title"
             onInput={inputHandler}
-            value={formState.title}
+            value={loadedPlaces.title}
             valid={true}
           />
           <Input
