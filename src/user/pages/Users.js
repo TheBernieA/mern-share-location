@@ -1,18 +1,18 @@
-import { Fragment } from "react";
+import React, { Fragment } from "react";
 import UsersList from "../components/UsersList";
 
 const Users = () => {
-    const USERS = [
-        {
-            id:'u1',
-            name:'Mario Rossi',
-            image:'https://upload.wikimedia.org/wikipedia/it/thumb/6/62/Mario_Rossi_%28direttore_d%27orchestra%29.jpg/1024px-Mario_Rossi_%28direttore_d%27orchestra%29.jpg',
-            places:5
-        }
-    ]
+  const USERS = [
+    {
+      id: "u1",
+      name: "Mario Rossi",
+      image: "https://upload.wikimedia.org/wikipedia/it/thumb/6/62/Mario_Rossi_%28direttore_d%27orchestra%29.jpg/1024px-Mario_Rossi_%28direttore_d%27orchestra%29.jpg",
+      places: 5,
+    },
+  ];
   return (
     <Fragment>
-      <UsersList items={USERS}/>
+      <UsersList items={USERS} />
     </Fragment>
   );
 };

@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useState } from "react";
+import React, { Fragment, useCallback, useState } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import NewPlace from "./places/pages/NewPlace";
 import UpdatePlace from "./places/pages/UpdatePlace";
@@ -55,9 +55,7 @@ const App = () => {
   }
   return (
     <Fragment>
-      <AuthContext.Provider
-        value={{ isLoggedIn: isLoggedIn, login: login, logout: logout }}
-      >
+      <AuthContext.Provider value={{ isLoggedIn: isLoggedIn, login: login, logout: logout }}>
         <MainNavigation />
         <main>
           <Switch>{routes}</Switch>
