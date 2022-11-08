@@ -41,7 +41,7 @@ const history = useHistory()
 
     try {
       await sendRequest(
-        "http://localhost:3000/api/places",
+        "/api/places",
         "POST",
         JSON.stringify({
           title: formState.inputs.title.value,

@@ -44,9 +44,10 @@ const UserPlaces = () => {
     const fetchPlaces = async () => {
       try {
         const response = await sendRequest(
-          `http://localhost:3000/api/places/user/${params}`
+          `/api/places/user/${params}`
         );
-        setLoadedPlaces(response.places);
+        //console.log(response.findUserPlaces)
+        setLoadedPlaces(response.findUserPlaces);
       } catch (error) {}
     };
     fetchPlaces();
